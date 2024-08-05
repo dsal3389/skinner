@@ -1,0 +1,11 @@
+[package]
+name = "skinner"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.86"
+crossterm = "0.28.1"
+minijinja = { version = "2.1.1", features = ["loader"] }
+serde = { version = "1.0.204", features = ["derive"] }
+toml = "0.8.19"

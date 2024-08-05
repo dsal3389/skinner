@@ -1,0 +1,24 @@
+[interfaces]
+range = {start=5, end=6}
+name_template = "Ethernet {{n}}/{{n}}"
+
+[interfaces.template.brief]
+template = "config_examples/templates/interface.brief.txt"
+
+[routes]
+range = {start=5, end=6}
+
+[session.x]
+prompt = "boby"
+level = 10
+
+[session.y]
+prompt = "x"
+level = 20
+
+[command.show]
+level = 0
+
+[command.show.ip.brief]
+template_ref = "interfaces.template.brief"
+

@@ -1,0 +1,7 @@
+bla bla bla
+
+{{% for interface in interfaces %}}
+{{interface.name}} STATE UP
+  other sheeeeeet
+{{% endfor %}}
+
