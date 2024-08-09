@@ -20,20 +20,21 @@ pub struct CommandConfig {
 }
 
 #[derive(Deserialize)]
-pub struct RoutesConfig {
-    pub range: Range<u16>,
-}
-
-#[derive(Deserialize)]
-pub struct InterfaceTemplateConfig {
+pub struct TemplateConfig {
     pub template: PathBuf,
 }
 
 #[derive(Deserialize)]
+pub struct RoutesConfig {
+    pub count: u16,
+    pub template: HashMap<String, TemplateConfig>,
+}
+
+#[derive(Deserialize)]
 pub struct InterfacesConfig {
-    pub range: Range<u16>,
+    pub count: u16,
     pub name_template: String,
-    pub template: HashMap<String, InterfaceTemplateConfig>,
+    pub template: HashMap<String, TemplateConfig>,
 }
 
 #[derive(Deserialize)]

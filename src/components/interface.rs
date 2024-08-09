@@ -1,6 +1,5 @@
 use anyhow::{Context, Result};
 use minijinja::{context, Environment};
-use std::ops::Range;
 
 #[derive(Debug)]
 pub struct Interface {
@@ -10,17 +9,21 @@ pub struct Interface {
 impl Interface {
     pub const JINAJ_NAME_TEMP: &'static str = "interface name";
 
-    pub fn new(name: String) -> Self {
+    fn new(name: String) -> Self {
         Self { name }
     }
 
-    pub fn generate_range(jinja_env: &Environment, range: Range<u16>) -> Result<Vec<Interface>> {
-        let mut interfaces = Vec::new();
+    // generating `n` random interfaces with jinja information
+    pub fn generaten(jinja_env: &Environment, count: u16) -> Result<Vec<Interface>> {
+        let mut interfaces = Vec::with_capacity(count as usize);
         let name_template = jinja_env
             .get_template(Self::JINAJ_NAME_TEMP)
-            .context("generating random interfaces")?;
+            .context(format!(
+                "couldn't get jinja template `{}`",
+                Self::JINAJ_NAME_TEMP
+            ))?;
 
-        for _ in range {
+        for _ in 0..count {
             let name = name_template
                 .render(context! (n => 5))
                 .context("rendering interface name template")?;

@@ -1,12 +1,15 @@
 [interfaces]
-range = {start=5, end=6}
+count = 3
 name_template = "Ethernet {{n}}/{{n}}"
 
 [interfaces.template.brief]
 template = "config_examples/templates/interface.brief.txt"
 
 [routes]
-range = {start=5, end=6}
+count = 10
+
+[routes.template.brief]
+template = "config_examples/templates/route.brief.txt"
 
 [session.x]
 prompt = "boby"
