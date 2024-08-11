@@ -26,13 +26,13 @@ pub struct TemplateConfig {
 
 #[derive(Deserialize)]
 pub struct RoutesConfig {
-    pub count: u16,
+    pub count: u32,
     pub template: HashMap<String, TemplateConfig>,
 }
 
 #[derive(Deserialize)]
 pub struct InterfacesConfig {
-    pub count: u16,
+    pub count: u32,
     pub name_template: String,
     pub template: HashMap<String, TemplateConfig>,
 }

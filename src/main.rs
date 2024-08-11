@@ -6,7 +6,6 @@ mod components;
 mod config;
 mod terminal;
 
-use components::{Interface, Route};
 use config::ConfigParser;
 
 mod jinja {
@@ -75,6 +74,78 @@ mod jinja {
     }
 }
 
+mod generate {
+    use anyhow::{Context, Result};
+    use minijinja::{context, Environment};
+    use rand::random;
+    use std::net::{IpAddr, Ipv4Addr};
+
+    use crate::{
+        components::{Interface, Route},
+        config::{InterfacesConfig, RoutesConfig},
+    };
+
+    // used by `next_address` to keep track of which
+    // next address is available
+    static mut CURRENT_ADDRESS: u32 = 0x01000001;
+
+    // a simple iterator function that returns
+    // the next available address based on static var `CURRENT_ADDRESS`
+    fn next_address(n: u32) -> Option<IpAddr> {
+        unsafe {
+            let address = Ipv4Addr::from(CURRENT_ADDRESS);
+            CURRENT_ADDRESS += n;
+
+            if address.is_broadcast()
+                || address.is_loopback()
+                || address.is_multicast()
+                || address.is_link_local()
+            {
+                return None;
+            }
+            Some(IpAddr::V4(address))
+        }
+    }
+
+    pub fn interfaces(
+        jinja_env: &Environment,
+        config: &InterfacesConfig,
+    ) -> Result<Vec<Interface>> {
+        let mut interfaces = Vec::with_capacity(config.count as usize);
+        let name_template = jinja_env
+            .get_template(Interface::JINAJ_NAME_TEMP)
+            .context(format!(
+                "couldn't get jinja template `{}`",
+                Interface::JINAJ_NAME_TEMP
+            ))?;
+
+        for _ in 0..config.count {
+            let address =
+                next_address(1).context("couldn't generate more addresses for interfaces")?;
+            let name = name_template
+                .render(context! (n => 5))
+                .context("rendering interface name template")?;
+            interfaces.push(Interface::new(name, address));
+        }
+        Ok(interfaces)
+    }
+
+    #[allow(dead_code)]
+    pub fn routes<'a>(
+        jinja_env: &Environment,
+        config: &RoutesConfig,
+        interfaces: &'a Vec<Interface>,
+    ) -> Result<Vec<Route<'a>>> {
+        let mut routes = Vec::new();
+
+        for _ in 0..config.count {
+            let address = next_address(1).context("couldn't generate more address for routes")?;
+            routes.push(Route::new(address, None));
+        }
+        Ok(routes)
+    }
+}
+
 fn main() -> Result<()> {
     let mut jinja_env = Environment::new();
     let mut config_parser = match env::args().nth(1) {
@@ -88,9 +159,10 @@ fn main() -> Result<()> {
     jinja::setup_interfaces(&mut jinja_env, &config.interfaces)?;
     jinja::setup_routes(&mut jinja_env, &config.routes)?;
 
-    let interfaces = Interface::generaten(&jinja_env, config.interfaces.count)?;
-    let routes = Route::generaten(&interfaces, config.routes.count);
+    let interfaces = generate::interfaces(&jinja_env, &config.interfaces)?;
+    let routes = generate::routes(&jinja_env, &config.routes, &interfaces)?;
 
-    println!("{routes:?}");
+    println!("{routes:?}\n\n");
+    println!("{interfaces:?}");
     Ok(())
 }
